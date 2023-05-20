@@ -9,20 +9,24 @@ import Button from '../../../components/Button';
 import AngleLeftIcon from '../../../assets/icons/angle-left-solid.svg';
 import AngleRightIcon from '~/assets/icons/angle-right-solid.svg';
 import ListItem from './components/ListItem';
+import { GET_ORDERS_QUERY } from './queries';
+import { useQuery } from '@apollo/client';
 
 const OrdersList = observer(
   (): JSX.Element => {
+    const { loading, error, data } = useQuery(GET_ORDERS_QUERY);
+
     const [state] = React.useState(new OrdersListState());
 
     useEffect(() => {
-      if (state.initialized) return;
+      if (state.initialized) state.setOrders(data);
+
       state.initialize();
-    });
+    }, []);
 
     return (
       <React.Fragment>
-        <div>wdwefwe</div>
-        {/* <div className={styles.screenWrapper}>
+        <div className={styles.screenWrapper}>
           <div className={styles.screen}>
             {state.loading && <span>Loading...</span>}
             {!state.loading && (
@@ -62,7 +66,7 @@ const OrdersList = observer(
               />
             </div>
           </div>
-        </div> */}
+        </div>
       </React.Fragment>
     );
   },

@@ -5,6 +5,7 @@ import { RetailService } from './retail_api/retail.service'
 import { GraphQLModule } from '@nestjs/graphql'
 import { OrdersModule } from './orders/orders.module'
 import { ReferenceModule } from './reference/reference.module'
+import { OrdersResolver } from './orders/orders.resolver'
 const { join } = require('path')
 
 @Module({

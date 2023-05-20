@@ -7,6 +7,13 @@ export type RetailPagination = {
   totalPageCount: number
 }
 
+export class Pagination {
+  limit: 20 | 50 | 100 | 250
+  totalCount: number
+  currentPage: number
+  totalPageCount: number
+}
+
 export type OrdersFilter = {
   page?: number
   limit?: 20 | 50 | 100 | 250
@@ -70,4 +77,3 @@ export class Order {
   site: string
   orderType: string
 }
-

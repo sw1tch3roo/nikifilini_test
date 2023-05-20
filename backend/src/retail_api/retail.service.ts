@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from 'axios'
 import { ConcurrencyManager } from 'axios-concurrency'
 import { serialize } from '../tools'
 import { plainToClass } from 'class-transformer'
+import { DeliveryType, OrderStatus, ProductStatus } from 'src/graphql'
 
 @Injectable()
 export class RetailService {
@@ -13,7 +14,9 @@ export class RetailService {
     this.axios = axios.create({
       baseURL: `${process.env.RETAIL_URL}/api/v5`,
       timeout: 10000,
-      headers: {},
+      headers: {
+        'X-API-KEY': process.env.RETAIL_KEY,
+      },
     })
 
     this.axios.interceptors.request.use((config) => {
@@ -32,11 +35,13 @@ export class RetailService {
     )
   }
 
-  async orders(filter?: OrdersFilter): Promise<[Order[], RetailPagination]> {
+  async getOrders(filter?: OrdersFilter): Promise<[Order[], RetailPagination]> {
     const params = serialize(filter, '')
     const resp = await this.axios.get('/orders?' + params)
 
-    if (!resp.data) throw new Error('RETAIL CRM ERROR')
+    if (!resp.data) {
+      throw new Error('RETAIL CRM ERROR: Empty response data')
+    }
 
     const orders = plainToClass(Order, resp.data.orders as Array<any>)
     const pagination: RetailPagination = resp.data.pagination
@@ -44,11 +49,50 @@ export class RetailService {
     return [orders, pagination]
   }
 
-  async findOrder(id: string): Promise<Order | null> {}
+  async findOrder(id: string): Promise<Order | null> {
+    const params = serialize(id, '')
+    const resp = await this.axios.get('/orders?' + params)
 
-  async orderStatuses(): Promise<CrmType[]> {}
+    if (!resp.data) throw new Error('RETAIL CRM ERROR')
 
-  async productStatuses(): Promise<CrmType[]> {}
+    const order: Order = plainToClass(Order, resp.data.orders)
 
-  async deliveryTypes(): Promise<CrmType[]> {}
+    return order
+  }
+
+  async orderStatuses(): Promise<OrderStatus[]> {
+    const resp = await this.axios.get('/orderStatuses')
+
+    if (!resp.data || !resp.data.statuses) {
+      throw new Error('RETAIL CRM ERROR: Empty or invalid response data')
+    }
+
+    const statusesOrder: OrderStatus[] = resp.data.statuses
+
+    return statusesOrder
+  }
+
+  async productStatuses(): Promise<ProductStatus[]> {
+    const resp = await this.axios.get('/productStatuses')
+
+    if (!resp.data || !resp.data.statuses) {
+      throw new Error('RETAIL CRM ERROR: Empty or invalid response data')
+    }
+
+    const statusesProduct: ProductStatus[] = resp.data.statuses
+
+    return statusesProduct
+  }
+
+  async deliveryTypes(): Promise<DeliveryType[]> {
+    const resp = await this.axios.get('/deliveryTypes')
+
+    if (!resp.data || !resp.data.types) {
+      throw new Error('RETAIL CRM ERROR: Empty or invalid response data')
+    }
+
+    const typesDelivery: DeliveryType[] = resp.data.types
+
+    return typesDelivery
+  }
 }
